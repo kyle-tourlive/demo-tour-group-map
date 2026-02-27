@@ -252,12 +252,24 @@ function GroupCard({
                 {/* Tracks Render */}
                 {(groupTracks[group.id] || []).length > 0 ? (
                     <div className="space-y-2">
-                        {(groupTracks[group.id] || []).map((gt: TourGroupV2Tracks) => {
+                        {/* Sort tracks based on group.tour_tracks array order if available, else fallback to index property */}
+                        {[...groupTracks[group.id] || []].sort((a, b) => {
+                            if (group.tour_tracks && Array.isArray(group.tour_tracks)) {
+                                const idxA = group.tour_tracks.indexOf(a.tour_track);
+                                const idxB = group.tour_tracks.indexOf(b.tour_track);
+                                // If both are found in the array, sort by their position
+                                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                                // If one is not found, push it to the end
+                                if (idxA === -1) return 1;
+                                if (idxB === -1) return -1;
+                            }
+                            return a.index - b.index;
+                        }).map((gt: TourGroupV2Tracks, i: number) => {
                             const t = gt.track || tracks.find((x: TourTrack) => x.id === gt.tour_track);
                             return (
                                 <div key={gt.id} className="flex justify-between items-center p-2 bg-gray-50 border border-gray-100 rounded-md text-sm group/track">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-gray-400 text-xs font-mono w-4">{gt.index}</span>
+                                        <span className="text-gray-400 text-xs font-mono w-4">{i + 1}</span>
                                         <span className="font-semibold text-gray-600">#{gt.tour_track}</span>
                                         <span>{t?.title || t?.name || 'Unknown Track'}</span>
                                     </div>
