@@ -31,6 +31,7 @@
 ### 4. 트러블슈팅 및 기능 고도화 (2026-02-27)
 - **API 응답 구조 대응 & 동적 파싱 개선**: 기존 개발 초기 `data.results` 매핑 방식에서 실제 서비스망의 응답 변형 이슈 (직접 Array 반환 vs `{ results: [...] }` 형태의 Pagination 객체 반환 혼재)로 인해 트랙/맵 목록 렌더링 누락 발생을 확인. 이를 해결하기 위해 `tourApi.ts` 내 응답 형태에 따라 리스트를 뽑아내는 `extractData` 헬퍼 함수를 적용하여 브라우저의 런타임 에러(`maps.map is not a function`) 및 빈 목록 표출 현상 해결 (Tour ID 4, 416 테스트 완료).
 - **Group Tracks 렌더링 및 디테일 정렬 보정**: 트랙 하위 정보 매핑 시 `{ track_id }` 대신 API가 실 반환하는 `{ tour_track }` 필드 활용으로 개선. 추가적으로 사용자 피드백을 수용하여, UI 상의 트랙 정렬 순서 우선순위를 각 그룹이 자체 보유한 `tour_tracks` 원본 배열의 `indexOf`를 1순위로 참조하도록 Sort 로직 고도화 적용 (그룹 내 트랙 순서 완전 보장).
+- **Tour Map 데이터 포맷 파싱 및 렌더링 복구**: API 스펙 변경에 따라, 하드코딩되었던 `map_type`('GOOGLE', 'SVG')을 Numeric(`1`=SVG, `2`=Google)으로 대응시키고, 지도의 이름(Name)을 `exhibition_hall` 항목으로 매핑 동기화하였습니다. 이 과정을 통해 누락되었던 Google Map의 이름 표출과 위경도(`Lat/Lng`) 텍스트박스 입력 기능이 정상적으로 복구되었습니다.
 - **Nested Groups (서브 그룹) 렌더링 지원**: Tour 그룹 API에서 `parent` 필드를 활용, `GroupCard` 컴포넌트를 분리 및 재귀 함수로 구현하여 하위 그룹이 있을 경우 들여쓰기(Indentation) 및 좌측 테두리 색상으로 시각적 Depth 표현을 추가.
 - **환경 변수 분리**: 하드코딩되어 있던 인증 토큰(`kyle_...`)을 `.env.local`의 `NEXT_PUBLIC_TOURLIVE_API_TOKEN` 으로 안전하게 격리하고, 문서(`project_req.md`, `implementation_plan.md`) 내의 민감한 내용을 마스킹 처리하여 보안을 강화함.
 
