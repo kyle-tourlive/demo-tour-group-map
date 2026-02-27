@@ -1,17 +1,22 @@
 import { apiClient } from './api';
 import { TourTrack, TourGroupV2, TourGroupV2Tracks, TourMap, TourMapPoints } from '@/types/models';
 
+const extractData = <T>(data: any): T[] => {
+    if (Array.isArray(data)) return data;
+    return data?.results || [];
+};
+
 export const tourApi = {
     // --- Tracks ---
     getTourTracks: async (tourId: string): Promise<TourTrack[]> => {
-        const res = await apiClient.get<{ data: TourTrack[] }>(`/v4/tours/${tourId}/tour_tracks`);
-        return res.data.data || [];
+        const res = await apiClient.get<any>(`/v4/tours/${tourId}/tour_tracks`);
+        return extractData<TourTrack>(res.data.data);
     },
 
     // --- Tour Groups ---
     getTourGroups: async (tourId: string): Promise<TourGroupV2[]> => {
-        const res = await apiClient.get<{ data: TourGroupV2[] }>(`/v4/tours/${tourId}/tour_groups`);
-        return res.data.data || [];
+        const res = await apiClient.get<any>(`/v4/tours/${tourId}/tour_groups`);
+        return extractData<TourGroupV2>(res.data.data);
     },
     createTourGroup: async (tourId: string, data: Partial<TourGroupV2>): Promise<TourGroupV2> => {
         const res = await apiClient.post<TourGroupV2>(`/v4/tours/${tourId}/tour_groups`, data);
@@ -27,8 +32,8 @@ export const tourApi = {
 
     // --- Group Tracks ---
     getGroupTracks: async (tourId: string, groupId: number): Promise<TourGroupV2Tracks[]> => {
-        const res = await apiClient.get<{ data: TourGroupV2Tracks[] }>(`/v4/tours/${tourId}/tour_groups/${groupId}/tracks`);
-        return res.data.data || [];
+        const res = await apiClient.get<any>(`/v4/tours/${tourId}/tour_groups/${groupId}/tracks`);
+        return extractData<TourGroupV2Tracks>(res.data.data);
     },
     assignTrackToGroup: async (
         tourId: string,
@@ -52,8 +57,8 @@ export const tourApi = {
 
     // --- Tour Maps ---
     getTourMaps: async (tourId: string): Promise<TourMap[]> => {
-        const res = await apiClient.get<{ data: TourMap[] }>(`/v4/tours/${tourId}/tour_maps`);
-        return res.data.data || [];
+        const res = await apiClient.get<any>(`/v4/tours/${tourId}/tour_maps`);
+        return extractData<TourMap>(res.data.data);
     },
     createTourMap: async (tourId: string, data: Partial<TourMap>): Promise<TourMap> => {
         const res = await apiClient.post<TourMap>(`/v4/tours/${tourId}/tour_maps`, data);
@@ -65,8 +70,8 @@ export const tourApi = {
 
     // --- Tour Map Points ---
     getTourMapPoints: async (tourId: string, mapId: number): Promise<TourMapPoints[]> => {
-        const res = await apiClient.get<{ data: TourMapPoints[] }>(`/v4/tours/${tourId}/tour_maps/${mapId}/points`);
-        return res.data.data || [];
+        const res = await apiClient.get<any>(`/v4/tours/${tourId}/tour_maps/${mapId}/points`);
+        return extractData<TourMapPoints>(res.data.data);
     },
     createTourMapPoint: async (tourId: string, mapId: number, data: Partial<TourMapPoints>): Promise<TourMapPoints> => {
         const res = await apiClient.post<TourMapPoints>(`/v4/tours/${tourId}/tour_maps/${mapId}/points`, data);

@@ -34,6 +34,10 @@
 - **Nested Groups (서브 그룹) 렌더링 지원**: Tour 그룹 API에서 `parent` 필드를 활용, `GroupCard` 컴포넌트를 분리 및 재귀 함수로 구현하여 하위 그룹이 있을 경우 들여쓰기(Indentation) 및 좌측 테두리 색상으로 시각적 Depth 표현을 추가.
 - **환경 변수 분리**: 하드코딩되어 있던 인증 토큰(`kyle_...`)을 `.env.local`의 `NEXT_PUBLIC_TOURLIVE_API_TOKEN` 으로 안전하게 격리하고, 문서(`project_req.md`, `implementation_plan.md`) 내의 민감한 내용을 마스킹 처리하여 보안을 강화함.
 
+### 5. 빌드 안정성 확보 및 코드 품질 개선 (2026-02-27)
+- **타입 에러 및 Lint 경고 수정**: 애플리케이션 프로덕션 빌드 과정(`npm run build`)을 저해할 수 있는 `@typescript-eslint/no-explicit-any` 에러(`TourGroupManager` 내 재귀 컴포넌트인 `GroupCard` 부분)를 해결하기 위해 `GroupCardProps` 인터페이스를 명시적으로 작성하고 적용함.
+- **무의미한 변수 및 임포트 정리**: `TourGroupManager`와 `TourMapManager` 설계 시 선언되었으나 사용되지 않던 `err` 변수, `loading`, `tracks` 등의 불필요한 상태값과 아이콘(`ChevronRight`, `Save` 등)들의 선언을 모두 정리하여 ESLint 경고를 해소함. 이를 바탕으로 원활한 Next.js 프로덕션 정적/동적 렌더링 검증 완료.
+
 ## 향후 과제 및 개선 포인트
 - Drag and Drop으로 배정된 트랙들의 순서(Index)를 시각적으로 변경하는(Sortable) UX 개선.
 - API 호출 시 발생하는 에러(403 Forbidden 등)에 대해 토스트알림(Toast) 등으로 에러 핸들링 고도화 적용 필요.

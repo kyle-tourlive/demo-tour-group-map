@@ -53,7 +53,7 @@ export function TourGroupManager({ tourId }: { tourId: string }) {
             setNewGroupTitle('');
             setIsCreatingGroup(false);
             loadData();
-        } catch (err) {
+        } catch {
             alert('Failed to create group');
         }
     };
@@ -63,7 +63,7 @@ export function TourGroupManager({ tourId }: { tourId: string }) {
         try {
             await tourApi.deleteTourGroup(tourId, groupId);
             loadData();
-        } catch (err) {
+        } catch {
             alert('Failed to delete group');
         }
     };
@@ -88,7 +88,7 @@ export function TourGroupManager({ tourId }: { tourId: string }) {
             // Refresh only this group's tracks for performance, or full reload
             const updatedTracks = await tourApi.getGroupTracks(tourId, groupId);
             setGroupTracks(prev => ({ ...prev, [groupId]: updatedTracks }));
-        } catch (err) {
+        } catch {
             alert('Failed to assign track to group');
         }
     };
@@ -98,7 +98,7 @@ export function TourGroupManager({ tourId }: { tourId: string }) {
             await tourApi.removeTrackFromGroup(tourId, groupId, groupTrackId);
             const updatedTracks = await tourApi.getGroupTracks(tourId, groupId);
             setGroupTracks(prev => ({ ...prev, [groupId]: updatedTracks }));
-        } catch (err) {
+        } catch {
             alert('Failed to remove track');
         }
     };
@@ -113,7 +113,7 @@ export function TourGroupManager({ tourId }: { tourId: string }) {
                     Available Tracks ({tracks.length})
                 </div>
                 <div className="p-4 overflow-y-auto flex-1 space-y-2">
-                    {tracks.map((track) => (
+                    {(tracks || []).map((track) => (
                         <div
                             key={track.id}
                             draggable
@@ -157,7 +157,7 @@ export function TourGroupManager({ tourId }: { tourId: string }) {
                         </div>
                     )}
 
-                    {groups.filter(g => !g.parent).map((group) => (
+                    {(groups || []).filter(g => !g.parent).map((group) => (
                         <div key={group.id} className="space-y-4">
                             <GroupCard
                                 group={group}
@@ -183,6 +183,18 @@ export function TourGroupManager({ tourId }: { tourId: string }) {
 }
 
 // Separated Component to support recursion for sub-groups
+interface GroupCardProps {
+    group: TourGroupV2;
+    groups: TourGroupV2[];
+    groupTracks: Record<number, TourGroupV2Tracks[]>;
+    tracks: TourTrack[];
+    handleDrop: (e: React.DragEvent, groupId: number) => void;
+    handleDeleteGroup: (groupId: number) => void;
+    handleRemoveTrack: (groupId: number, groupTrackId: number) => void;
+    tourId: string;
+    depth: number;
+}
+
 function GroupCard({
     group,
     groups,
@@ -193,7 +205,7 @@ function GroupCard({
     handleRemoveTrack,
     tourId,
     depth
-}: any) {
+}: GroupCardProps) {
     const subGroups = groups.filter((g: TourGroupV2) => g.parent === group.id);
     const marginLeft = depth > 0 ? `${depth * 1.5}rem` : '0';
 

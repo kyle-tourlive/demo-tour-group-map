@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { tourApi } from '@/lib/tourApi';
 import { TourMap, TourMapPoints, TourTrack } from '@/types/models';
-import { Plus, Trash, Image as ImageIcon, Map as MapIcon, ChevronRight, Save } from 'lucide-react';
+import { Plus, Trash, Image as ImageIcon, Map as MapIcon } from 'lucide-react';
 
 export function TourMapManager({ tourId }: { tourId: string }) {
     const [maps, setMaps] = useState<TourMap[]>([]);
-    const [tracks, setTracks] = useState<TourTrack[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [, setTracks] = useState<TourTrack[]>([]);
+    const [, setLoading] = useState(true);
     const [selectedMap, setSelectedMap] = useState<TourMap | null>(null);
 
     // Points for selected map
@@ -69,7 +69,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
             setNewMapName('');
             setNewMapImageUrl('');
             loadData();
-        } catch (err) {
+        } catch {
             alert('Failed to create map');
         }
     };
@@ -80,7 +80,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
             await tourApi.deleteTourMap(tourId, mapId);
             if (selectedMap?.id === mapId) setSelectedMap(null);
             loadData();
-        } catch (err) {
+        } catch {
             alert('Failed to delete map');
         }
     };
@@ -93,7 +93,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
                 ...extraData,
             });
             loadPoints(selectedMap.id);
-        } catch (err) {
+        } catch {
             alert('Failed to create point');
         }
     };
@@ -103,7 +103,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
         try {
             await tourApi.updateTourMapPoint(tourId, selectedMap.id, pointId, data);
             loadPoints(selectedMap.id);
-        } catch (err) {
+        } catch {
             alert('Failed to update point');
         }
     };
@@ -113,7 +113,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
         try {
             await tourApi.deleteTourMapPoint(tourId, selectedMap.id, pointId);
             loadPoints(selectedMap.id);
-        } catch (err) {
+        } catch {
             alert('Failed to delete point');
         }
     };
@@ -218,7 +218,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
                         </div>
                     )}
 
-                    {maps.map(map => (
+                    {(maps || []).map(map => (
                         <div
                             key={map.id}
                             onClick={() => setSelectedMap(map)}
