@@ -27,9 +27,13 @@ export interface TourGroupV2Tracks {
 
 export interface TourMap {
     id: number;
-    tour_id: number;
-    name: string;
-    map_type: 'GOOGLE' | 'SVG';
+    tour?: number;
+    tour_id?: number;
+    name?: string;
+    exhibition_hall?: string;
+    map_type: number | string; // 1 = SVG, 2 = GOOGLE
+    map_type_label?: string;
+    svg_image?: string;
     image_url?: string;
     map_points?: TourMapPoints[];
 }

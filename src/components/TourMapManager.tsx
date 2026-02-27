@@ -61,9 +61,10 @@ export function TourMapManager({ tourId }: { tourId: string }) {
         if (!newMapName.trim()) return;
         try {
             await tourApi.createTourMap(tourId, {
+                exhibition_hall: newMapName,
                 name: newMapName,
-                map_type: newMapType,
-                image_url: newMapType === 'SVG' ? newMapImageUrl : undefined,
+                map_type: newMapType === 'GOOGLE' ? 2 : 1,
+                svg_image: newMapType === 'SVG' ? newMapImageUrl : undefined,
             });
             setIsCreatingMap(false);
             setNewMapName('');
@@ -130,7 +131,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
     };
 
     const renderPointEditorRow = (point: TourMapPoints) => {
-        const isGoogle = selectedMap?.map_type === 'GOOGLE';
+        const isGoogle = selectedMap?.map_type === 2 || selectedMap?.map_type === 'GOOGLE';
         return (
             <tr key={point.id} className="border-b border-gray-100 hover:bg-gray-50 text-sm">
                 <td className="p-3 text-gray-500 font-mono">#{point.id}</td>
@@ -218,27 +219,31 @@ export function TourMapManager({ tourId }: { tourId: string }) {
                         </div>
                     )}
 
-                    {(maps || []).map(map => (
-                        <div
-                            key={map.id}
-                            onClick={() => setSelectedMap(map)}
-                            className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer transition ${selectedMap?.id === map.id ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'bg-gray-50 hover:border-blue-300'}`}
-                        >
-                            <div className="flex items-center gap-3">
-                                {map.map_type === 'GOOGLE' ? <MapIcon size={18} className="text-green-600" /> : <ImageIcon size={18} className="text-purple-600" />}
-                                <div>
-                                    <div className="font-medium text-sm text-gray-800">{map.name}</div>
-                                    <div className="text-xs text-gray-400">ID: {map.id}</div>
-                                </div>
-                            </div>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); handleDeleteMap(map.id); }}
-                                className="text-gray-400 hover:text-red-500"
+                    {(maps || []).map(map => {
+                        const isGoogleMap = map.map_type === 2 || map.map_type === 'GOOGLE';
+                        const mapName = map.exhibition_hall || map.name || `Unnamed Map ${map.id}`;
+                        return (
+                            <div
+                                key={map.id}
+                                onClick={() => setSelectedMap(map)}
+                                className={`p-3 border rounded-lg flex items-center justify-between cursor-pointer transition ${selectedMap?.id === map.id ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'bg-gray-50 hover:border-blue-300'}`}
                             >
-                                <Trash size={16} />
-                            </button>
-                        </div>
-                    ))}
+                                <div className="flex items-center gap-3">
+                                    {isGoogleMap ? <MapIcon size={18} className="text-green-600" /> : <ImageIcon size={18} className="text-purple-600" />}
+                                    <div>
+                                        <div className="font-medium text-sm text-gray-800">{mapName}</div>
+                                        <div className="text-xs text-gray-400">ID: {map.id}</div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteMap(map.id); }}
+                                    className="text-gray-400 hover:text-red-500"
+                                >
+                                    <Trash size={16} />
+                                </button>
+                            </div>
+                        );
+                    })}
                     {maps.length === 0 && !isCreatingMap && <p className="text-sm text-gray-500 text-center py-4">No maps configured.</p>}
                 </div>
             </div>
@@ -249,12 +254,12 @@ export function TourMapManager({ tourId }: { tourId: string }) {
                     <div className="flex flex-col h-full">
                         <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
                             <div>
-                                <h3 className="font-semibold text-lg">{selectedMap.name}</h3>
+                                <h3 className="font-semibold text-lg">{selectedMap.exhibition_hall || selectedMap.name || `Map ${selectedMap.id}`}</h3>
                                 <p className="text-xs text-gray-500">
-                                    {selectedMap.map_type} Map • {points.length} points
+                                    {(selectedMap.map_type === 2 || selectedMap.map_type === 'GOOGLE') ? 'Google' : 'SVG'} Map • {points.length} points
                                 </p>
                             </div>
-                            {selectedMap.map_type === 'GOOGLE' && (
+                            {(selectedMap.map_type === 2 || selectedMap.map_type === 'GOOGLE') && (
                                 <button
                                     onClick={() => handleCreatePoint()}
                                     className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-1"
@@ -266,14 +271,14 @@ export function TourMapManager({ tourId }: { tourId: string }) {
 
                         <div className="flex-1 overflow-y-auto flex flex-col">
                             {/* SVG Viewer */}
-                            {selectedMap.map_type === 'SVG' && (
+                            {(selectedMap.map_type === 1 || selectedMap.map_type === 'SVG') && (
                                 <div className="p-4 border-b bg-gray-100 flex justify-center">
-                                    {selectedMap.image_url ? (
+                                    {(selectedMap.svg_image || selectedMap.image_url) ? (
                                         <div className="relative inline-block border border-gray-300 shadow-sm bg-white cursor-crosshair group">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
-                                                src={selectedMap.image_url}
-                                                alt={selectedMap.name}
+                                                src={selectedMap.svg_image || selectedMap.image_url}
+                                                alt={selectedMap.exhibition_hall || selectedMap.name || 'Map'}
                                                 className="max-h-[300px] object-contain"
                                                 onClick={handleSvgClick}
                                             />
@@ -312,7 +317,7 @@ export function TourMapManager({ tourId }: { tourId: string }) {
                                         {points.length === 0 && (
                                             <tr>
                                                 <td colSpan={4} className="p-8 text-center text-gray-400">
-                                                    {selectedMap.map_type === 'SVG' ? 'Click on the image above to add points.' : 'No points added yet. Add a row to start.'}
+                                                    {(selectedMap.map_type === 1 || selectedMap.map_type === 'SVG') ? 'Click on the image above to add points.' : 'No points added yet. Add a row to start.'}
                                                 </td>
                                             </tr>
                                         )}
